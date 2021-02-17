@@ -89,10 +89,17 @@ int main(void) {
 	MX_USART2_UART_Init();
 	/* USER CODE BEGIN 2 */
 	GPIO_PinState SwitchState[2]; // now,last
-	GPIO_PinState SwitchState1[2]; // now,last
+	GPIO_PinState SwitchState1[2];
+	GPIO_PinState SwitchState2[2];
 	uint16_t LED1_HalfPeriod = 1000; // 1Hz
 	uint32_t TimeStamp = 0;
 	uint32_t ButtonTimeStamp = 0;
+	uint32_t ButtonTimeStamp1 = 0;
+	uint32_t ButtonTimeStamp2 = 0;
+	uint8_t state3 = 0;
+	uint32_t TimeDelay = 0;
+	uint8_t a = 0;
+	uint8_t q=0;
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
@@ -129,18 +136,86 @@ int main(void) {
 				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
 			}
 		}
-
-		if (HAL_GetTick() - ButtonTimeStamp >= 100) {  // swith press is Low
+		if (HAL_GetTick() - ButtonTimeStamp1 >= 100) {
+			ButtonTimeStamp1 = HAL_GetTick();
 			SwitchState1[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_3);
 			if (SwitchState1[1] == GPIO_PIN_SET
-					&& SwitchState[0] == GPIO_PIN_RESET) {
-				HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
+					&& SwitchState1[0] == GPIO_PIN_RESET) {
+
+				if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_7) == GPIO_PIN_SET) {
+					HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_RESET);
+				} else {
+					HAL_GPIO_WritePin(GPIOC, GPIO_PIN_7, GPIO_PIN_SET);
+				}
 
 			}
-			SwitchState[1] = SwitchState[0];
+			SwitchState1[1] = SwitchState1[0];
 		}
 
-	}
+		if (HAL_GetTick() - ButtonTimeStamp2>= 10) {
+			ButtonTimeStamp2 = HAL_GetTick();
+			SwitchState2[0] = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_5);
+			if (SwitchState2[1] == GPIO_PIN_SET
+					&& SwitchState2[0] == GPIO_PIN_RESET) {
+				state3 += 1;
+			}
+		}
+			q=(state3)%2;
+
+			switch (q) {
+			case (0):
+				switch (a) {
+				case (0):
+					if (HAL_GetTick() - TimeDelay >= 1500) {
+						TimeDelay = HAL_GetTick();
+						a = 1;
+					} else {
+						HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);}
+					break;
+					case (1):
+
+						if (HAL_GetTick() - TimeDelay >= 500) {
+							TimeDelay = HAL_GetTick();
+							a = 0;
+						} else {
+							HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6,GPIO_PIN_SET);
+						}
+					break;
+
+				}
+			break;
+
+
+			case (1):
+				switch (a) {
+				case (0):
+					if (HAL_GetTick() - TimeDelay >= 1500) {
+						TimeDelay = HAL_GetTick();
+						a = 1;
+					} else {
+						HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+					}
+				break;
+					case (1):
+
+						if (HAL_GetTick() - TimeDelay >= 500) {
+							TimeDelay = HAL_GetTick();
+							a = 0;
+						} else {
+							HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6,GPIO_PIN_RESET);
+						}
+						break;
+					}
+
+				break;
+				}
+
+SwitchState2[1] = SwitchState2[0];
+		}
+
+
+
+
 	/* USER CODE END 3 */
 }
 
